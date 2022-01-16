@@ -1,0 +1,8 @@
+yes no You seem uncertain
+2 3 0
+? What is it you really want to know?
+1 8 0
+i don't Do you wish to {}
+2 5 2
+darn Watch your profanity.
+1 3 0

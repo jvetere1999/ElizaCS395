@@ -1,0 +1,60 @@
+default1 Do go on
+1 3 0
+default2 Lets move on to something else
+1 6 0
+default3 I would not like to talk about this
+1 8 0
+recall1 Back to {}
+1 3 4
+recall2 I would like to know more about {}
+1 8 1
+short1 Tell me more
+1 3 0
+i am Did you come to me because you are {}
+2 9 2
+yes Are you positive?
+1 3 0
+no Are you sure?
+1 3 0
+your Why are you concerned about my {}
+1 7 1
+is Why do you say {}
+1 4 3
+perhaps Why the uncertain tone?
+1 4 0
+maybe Why the uncertain tone?
+1 4 0
+you We were discussing you, not me.
+1 6 0
+sorry Please do not apologize
+1 4 0
+you are Why are you interested in weather or not I am {}
+2 11 1
+are you What makes you think I am {}
+2 6 1
+i need What would it mean if you got {}
+2 8 1
+mother Tell me more about your mother
+1 6 0
+father Tell me more about your father
+1 6 0
+brother Tell me more about your brother
+1 6 0
+sister Tell me more about your sister
+1 6 0
+partner Tell me more about your partner
+1 6 0
+you are like What resemblance do you see?
+3 5 0
+is What else comes to mind when you think of {}
+1 10 -1
+? What is it you really want to know?
+1 8 0
+i don't Do you wish to {}
+2 5 2
+darn Watch your profanity.
+1 3 0
+yes no You seem uncertain
+2 3 0
+name I am not interested in names.
+1 6 0
