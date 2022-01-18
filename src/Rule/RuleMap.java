@@ -5,42 +5,41 @@ import Resources.RuleResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class RuleMap {
 
-    public HashMap<String[], String[]> rules;
+    public HashMap<String, ArrayList<String>> rules;
 
-    private HashMap<String[], int[]> ruleVarMap; // [0] KeyLength [1] Value length [2] context length
+    private HashMap<String, int[]> ruleVarMap; // [0] KeyLength [1] Value length [2] context length
 
     private String entryFile;
 
     public RuleMap(String entryFile){
         this.entryFile = entryFile;
 
-        this.rules = new HashMap<String[], String[]>();
-        this.ruleVarMap = new HashMap<String[], int[]>();
+        this.rules = new HashMap<String, ArrayList<String>>();
+        this.ruleVarMap = new HashMap<String, int[]>();
 
         breakInput();
     }
 
-    public RuleResponse get(String key[]){
+    public RuleResponse get(String key){
         return new RuleResponse( this.ruleVarMap.get(key), this.rules.get(key) );
     }
 
-    public String[] getValue(String[] key) {
+    public ArrayList<String> getValue(String key) {
         return this.rules.get(key);
     }
 
-    public int[] getRuleVar(String[] key) {
+    public int[] getRuleVar(String key) {
         return this.ruleVarMap.get(key);
     }
 
-    public Set<String[]> keySet(){
-        return this.ruleVarMap.keySet();
+    public Set<String> keySet(){
+        return this.rules.keySet();
     }
+    public Collection<ArrayList<String>> values(){ return this.rules.values();}
 
     private void breakInput(){
         Scanner fileRead;
@@ -67,18 +66,22 @@ public class RuleMap {
 
     private void addToMap(String[] text, int keyLength, int valueLength, int responseLength){
 
-        String[] key = new String[keyLength];
-        String[] value = new String[valueLength];
+        String key = "";
+        ArrayList<String> value = new ArrayList<>();
 
         for (int keyIndex = 0; keyIndex < keyLength; keyIndex++){
-            key[keyIndex] = text[keyIndex];
+            if(keyIndex == keyLength - 1){
+                key += text[keyIndex];
+            }
+            else {
+                key += text[keyIndex] + " ";
+            }
         }
 
         for (int valueIndex = 0; valueIndex < valueLength; valueIndex++){
-            value[valueIndex] = text[valueIndex + keyLength];
-            System.out.println(value[valueIndex]);
-        }
+            value.add( valueIndex, text[valueIndex + keyLength]);
 
+        }
 
         this.rules.put(key, value);
         this.ruleVarMap.put(key, new int[]{keyLength, valueLength, responseLength});
@@ -87,11 +90,10 @@ public class RuleMap {
     @Override
     public String toString(){
         String rtr = "";
-        for (String[] key: rules.keySet()) {
+        for (String key: rules.keySet()) {
             String temp = "";
-            for(String word: key){
-                temp += word + " ";
-            }
+            temp += key + " ";
+
             temp += ": ";
             for (String word:rules.get(key)) {
                 temp += word + " ";
