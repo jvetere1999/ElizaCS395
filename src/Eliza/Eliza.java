@@ -11,13 +11,13 @@ public class Eliza {
     private RuleMap rules;
     private ArrayList<String> memory;
     private ArrayList<Integer> memoryAge;
-
+    private ArrayList<Integer> triggerEnd;
     public Eliza() {
-        this.rules = new RuleMap("rules.txt");
+        this.rules = new RuleMap("rules2.txt");
         memory = new ArrayList<>();
     }
 
-    public ArrayList<String> getResponse (String userMessage) {
+    public String getResponse (String userMessage) {
         String[] splitMsg = userMessage.toLowerCase().split(" ");
         ArrayList<String[]> responses = findAllReponses(splitMsg);
 
@@ -33,7 +33,18 @@ public class Eliza {
             }
 
         }
-        return rules.getValue(temp);
+        int[] var = rules.getRuleVar(temp);
+        int addedText = var[2];
+        int startIndex = triggerEnd.get(0);
+        String arr = "";
+        if(addedText != 0){
+
+            for(int index = 0; index < addedText; index++){
+                arr += splitMsg[startIndex + index] + " ";
+            }
+        }
+        return arr;
+        //return rules.getValue(temp);
     }
 
     private ArrayList<String[]> findAllReponses(String[] splitMsg) {
@@ -82,6 +93,7 @@ public class Eliza {
             System.out.println("Response Detected");
             return true;
         }
+        triggerEnd.add(checkIndex);
         return false;
     }
     public void printRules(){
