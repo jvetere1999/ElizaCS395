@@ -5,54 +5,68 @@ import Rule.RuleMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Eliza {
 
     private RuleMap rules;
     private ArrayList<String> memory;
     private ArrayList<Integer> memoryAge;
-    private ArrayList<Integer> triggerEnd;
     public Eliza() {
-        this.rules = new RuleMap("rules2.txt");
-        memory = new ArrayList<>();
+        this.rules = new RuleMap("rules.txt");
+        this.memory = new ArrayList<>();
+        this.memoryAge = new ArrayList<>();
     }
 
     public String getResponse (String userMessage) {
+        int rand;
+
         String[] splitMsg = userMessage.toLowerCase().split(" ");
-        ArrayList<String[]> responses = findAllReponses(splitMsg);
+        ArrayList<ArrayList<String>> responses = findAllReponses(splitMsg);
 
-        String[] key = responses.get(0);
-        String temp = "";
-        for (int keyIndex = 0; keyIndex < key.length; keyIndex++){
-            System.out.println(key[keyIndex]);
-            if(keyIndex == key.length - 1){
-                temp += key[keyIndex];
-            }
-            else {
-                temp += key[keyIndex] + " ";
-            }
 
+        if (splitMsg.length <= 4)
+            responses.add(this.rules.getValue("short1"));
+        if (responses.size() > 10 && this.memory.size() > 0) {
+            responses.add(rules.getValue("default1"));
+            ArrayList<String> recall1 = rules.getValue("recall1");
+            rand = ThreadLocalRandom.current().nextInt(0, memory.size());
+            int index = recall1.size() - 1;
+            recall1.remove(index);
+            recall1.add(memory.get(rand));
+            responses.add(recall1);
         }
-        int[] var = rules.getRuleVar(temp);
-        int addedText = var[2];
-        int startIndex = triggerEnd.get(0);
-        String arr = "";
-        if(addedText != 0){
-
-            for(int index = 0; index < addedText; index++){
-                arr += splitMsg[startIndex + index] + " ";
-            }
+        else if (responses.size() <= 10 && memory.size() > 0) {
+            responses.add(rules.getValue("default2"));
+            responses.add(rules.getValue("default3"));
+            ArrayList<String> recall1 = rules.getValue("recall2");
+            rand = ThreadLocalRandom.current().nextInt(0, memory.size());
+            int index = recall1.size() - 1;
+            recall1.remove(index);
+            recall1.add(memory.get(rand));
+            responses.add(recall1);
         }
-        return arr;
+        else {
+            responses.add(rules.getValue("default1"));
+            responses.add(rules.getValue("default2"));
+            responses.add(rules.getValue("default3"));
+        }
+         rand =ThreadLocalRandom.current().nextInt(0, responses.size());
+        String rtr = "";
+        for (String word: responses.get(rand)) {
+            rtr += word + " ";
+        }
+
+        return rtr;
         //return rules.getValue(temp);
     }
 
-    private ArrayList<String[]> findAllReponses(String[] splitMsg) {
-        ArrayList<String[]> possibleResponseKeys = new ArrayList<>();
+    private ArrayList<ArrayList<String>> findAllReponses(String[] splitMsg) {
+        ArrayList<ArrayList<String>> possibleResponse = new ArrayList<>();
 
-        if(Arrays.asList(splitMsg).contains("yes") && Arrays.asList(splitMsg).contains("no"))
-            possibleResponseKeys.add(new String[] {"yes", "no"});
-
+        if(Arrays.asList(splitMsg).contains("yes") && Arrays.asList(splitMsg).contains("no")) {
+            possibleResponse.add(rules.getValue("yes no"));
+        }
 
         for (int msgIndex = 0; msgIndex < splitMsg.length; msgIndex++) {
 
@@ -63,21 +77,51 @@ public class Eliza {
                     int[] ruleVar = rules.getRuleVar(potentialTrigger);
 
                     if (ruleVar[0] == 1){
-                        possibleResponseKeys.add(temp);
+                        getAddOnText(splitMsg, possibleResponse, msgIndex, potentialTrigger, ruleVar);
+
                         break;
                     }
                     else if(checkRule(potentialTrigger, splitMsg, msgIndex)) {
-
-                        possibleResponseKeys.add(temp);
+                        getAddOnText(splitMsg, possibleResponse, msgIndex, potentialTrigger, ruleVar);
                     }
                 }
             }
         }
-        System.out.println("Possible keys found\n" + possibleResponseKeys.size() + " usable keys");
-        return possibleResponseKeys;
+        return possibleResponse;
     }
+
+    private void getAddOnText(String[] splitMsg, ArrayList<ArrayList<String>> possibleResponse, int msgIndex, String potentialTrigger, int[] ruleVar) {
+        ArrayList<String> tempResponse = rules.getValue(potentialTrigger);
+        if(ruleVar[2]!=0 && (msgIndex+ruleVar[2]+1) < splitMsg.length){
+            int index = tempResponse.size() - 1;
+            tempResponse.remove(index);
+            String mem = "";
+            if(ruleVar[2]>0) {
+                for (int i = msgIndex + ruleVar[0]; i < msgIndex +  ruleVar[0] +ruleVar[2]; i++) {
+                    tempResponse.add(splitMsg[i]);
+                    mem += splitMsg[i] + " ";
+                }
+            }
+            else{
+                for (int i = msgIndex ; i > msgIndex + ruleVar[2] ; i--) {
+                    tempResponse.add(splitMsg[i]);
+                    mem += splitMsg[i] + " ";
+                }
+            }
+            memory.add(mem);
+            memoryAge.add(0);
+            possibleResponse.add(tempResponse);
+        }
+        else if (ruleVar[2]>0 && (msgIndex+ruleVar[2]+1) > splitMsg.length){
+
+        }
+        else{
+            possibleResponse.add(tempResponse);
+        }
+    }
+
     private boolean checkRule(String potentialTrigger, String[] splitMsg, int msgIndex) {
-        System.out.println("CHECKING RULES");
+
         String[] triggers = potentialTrigger.split(" ");
         RuleResponse current = rules.get(potentialTrigger);
 
@@ -90,11 +134,17 @@ public class Eliza {
                     return false;
                 checkIndex++;
             }
-            System.out.println("Response Detected");
+
             return true;
         }
-        triggerEnd.add(checkIndex);
+
         return false;
+    }
+
+    private void manageMemory(){
+        for (int index = 0; index < memoryAge.size(); index++){
+            memoryAge.add(index, memoryAge.get(index)+1);
+        }
     }
     public void printRules(){
         System.out.println(rules.toString());

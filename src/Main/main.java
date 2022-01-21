@@ -1,18 +1,32 @@
 package Main;
 
 import Eliza.Eliza;
-import Resources.RuleResponse;
-import Rule.RuleMap;
+import Resources.Log;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Scanner;
 
 public class main {
     public static void main(String[] args){
-        Eliza s = new Eliza();
-        System.out.println(s.getResponse("darn yes no i don't ?"));
-        s.printRules();
+        boolean runtime = true;
+        Scanner scan = new Scanner(System.in);
+        String input, elizaOutput, username;
+        System.out.println("What is your username?");
+        username = scan.nextLine();
 
+        Log log = new Log(username);
+        Eliza eliza = new Eliza();
 
+        while(runtime){
+            System.out.print(username+ ": ");
+            input = scan.nextLine().toLowerCase();
+            runtime = !input.equals("exit");
+            if (!runtime) break;
+            log.addToLog(input, false);
+            elizaOutput = eliza.getResponse(input);
+            log.addToLog(elizaOutput, true);
+            System.out.println("Eliza: "+ elizaOutput);
+            System.out.println("____________________________________________________________________________");
+        }
+        log.saveLog();
     }
 }
